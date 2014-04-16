@@ -1,12 +1,7 @@
-# Vert.x Gradle Template
+# Ractive.js and vert.x integration over the event bus
 
-Template project for creating a Vert.x module with a Gradle build.
+Small proof of concept project for fetching data for a client side Ractive.js application, from a vert.x based server backend. Data is transferred via the event bus provided by the vert.x platform.
 
-Clone this and adapt it to easily develop Vert.x modules using Gradle as your build tool.
+It's based on the vert.x [Gradle build template](http://vertx.io/gradle_dev.html) and Ractive.js own ["Comments"](http://examples.ractivejs.org/comments) simple example.
 
-By default this module contains a simple Java verticle which listens on the event bus and responds to `ping!`
-messages with `pong!`.
-
-This template also shows you how to write tests in Java, Groovy, Ruby and Python
-
-See the [build script](build.gradle) for the list of useful tasks
+For the whole description see [this blog post.](http://tryingthings.wordpress.com/2014/04/16/ractive-js-and-vert-x-integration-over-the-event-bus/) and of course on the pages of [vert.x](http://vertx.io/) and [Ractive.js](http://www.ractivejs.org/).
