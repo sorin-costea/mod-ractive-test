@@ -1,0 +1,46 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="css/app.css">
+<title>My index</title>
+</head>
+
+<body class="example">
+	<div id='template' class='comment-box'>
+		<h3>Comments</h3>
+
+		<!-- comment list -->
+		<div class='comment-list'>
+			{{#comments}}
+			<div class='comment-block' intro='slide'>
+				<h4 class='comment-author'>{{author}}</h4>
+
+				<div class='comment-text'>{{{ renderMarkdown( text ) }}}</div>
+			</div>
+			{{/comments}}
+		</div>
+
+		<!-- 'new comment' form -->
+		<form name='comment-form' class='comment-form' on-submit='post'>
+
+			<!-- author name -->
+			<input class='author-input' value='{{author}}'
+				placeholder='Your name' required>
+
+			<!-- comment body -->
+			<textarea value='{{text}}' placeholder='Say something...' required></textarea>
+
+			<!-- 'submit comment' button -->
+			<input type='submit' value='Submit comment'>
+		</form>
+	</div>
+</body>
+
+<script src='js/showdown.js'></script>
+<script src='js/ractive.js'></script>
+<script src='js/ractive-transitions-slide.js'></script>
+<script src='js/sockjs-min-0.3.4.js'></script>
+<script src='js/vertxbus.js'></script>
+<script src='js/app.js'></script>
+
+</html>
