@@ -1,11 +1,12 @@
 var eb = new vertx.EventBus(window.location.protocol + '//' + window.location.hostname + ':' + window.location.port
-	+ '/eventbus');
-var pa = 'vertx.mongopersistor';
+    + '/eventbus');
+var pa = 'vertx.elasticsearch';
 
 var ractive, converter;
-var sampleComments = [ {
-    author : 'Didi',
-    text : 'Sample...'
+var sampleEmployees = [ {
+  first_name : 'Didi',
+  last_name : 'Sample',
+  about : 'Some description...'
 } ];
 
 // make a markdown converter using the Showdown library -
@@ -13,79 +14,94 @@ var sampleComments = [ {
 converter = new Showdown.converter();
 
 eb.onopen = function() {
-    eb.send('vertx.mongopersistor', {
-	action : 'find',
-	collection : 'comments'
-    }, function(reply) {
-	if (reply.status === 'ok') {
-	    var comments = [];
-	    for (var i = 0; i < reply.results.length; i++) {
-		comments.push(reply.results[i]);
-	    }
-	    comments.sort(function(a, b) {
-		return b.id - a.id
-	    });
-	    ractive.set('comments', comments);
-	} else {
-	    console.error('Failed to retrieve comments: ' + reply.message);
-	}
-    });
+  eb.send(pa, {
+    action : 'search',
+    _index : 'megacorp',
+    _type : 'employee'
+  }, function(reply) {
+    if (reply.status === 'ok') {
+      var employees = [];
+      for (var i = 0; i < reply.hits.total; i++) {
+        employees.push(reply.hits.hits[i]._source);
+      }
+      employees.sort(function(a, b) {
+        if (0 === a.last_name.localeCompare(b.last_name))
+          return a.first_name.localeCompare(b.first_name);
+        return a.last_name.localeCompare(b.last_name);
+      });
+      ractive.set('employees', employees);
+    } else {
+      console.error('Failed to retrieve employees: ' + reply.message);
+    }
+  });
 }
 
 ractive = new Ractive({
-    el : 'example',
-    template : '#template',
-    noIntro : true, // disable transitions during initial render
-    data : {
-	comments : sampleComments,
-	renderMarkdown : function(md) {
-	    return converter.makeHtml(md);
-	}
+  el : 'example',
+  template : '#template',
+  noIntro : true, // disable transitions during initial render
+  data : {
+    employees : sampleEmployees,
+    renderMarkdown : function(md) {
+      return converter.makeHtml(md);
     }
+  }
 });
 
 ractive.on('post', function(event) {
-    var comment;
+  var employee;
 
-    // stop the page reloading
-    event.original.preventDefault();
+  // stop the page reloading
+  event.original.preventDefault();
 
-    // we can just grab the comment data from the model, since
-    // two-way binding is enabled by default
-    comment = {
-	author : this.get('author'),
-	text : this.get('text')
-    };
+  // we can just grab the employee data from the model, since
+  // two-way binding is enabled by default
+  employee = {
+    first_name : String(this.get('first_name')),
+    last_name : String(this.get('last_name')),
+    about : String(this.get('about'))
+  };
 
-    this.get('comments').unshift(comment);
+  // assume backend will work, so show already
+  var employees = this.get('employees');
+  employees.unshift(employee);
+  employees.sort(function(a, b) {
+    if (0 === a.last_name.localeCompare(b.last_name))
+      return a.first_name.localeCompare(b.first_name);
+    return a.last_name.localeCompare(b.last_name);
+  });
 
-    // reset the form
-    document.activeElement.blur();
-    this.set({
-	author : '',
-	text : ''
-    });
+  // reset the form
+  document.activeElement.blur();
+  this.set({
+    first_name : '',
+    last_name : '',
+    about : ''
+  });
 
-    // fire an event so we can (for example) save the comment to a server
-    this.fire('new comment', comment);
+  // fire an event so we can (for example) save the employee to a server
+  this.fire('new employee', employee);
 });
 
-ractive.on('new comment', function(comment) {
-    comment.id =  this.get('comments').length;
-    
-    eb.send('vertx.mongopersistor', {
-	action : 'save',
-	collection : 'comments',
-	document: comment
-    }, function(reply) {
-	if (reply.status === 'ok') {
-	    // whatever
-	} else {
-	    console.error('Failed to save comment: ' + reply.message);
-	    var posn = this.get('comments').indexOf(comment);
-	    if(-1 !== posn) {
-		this.get('comments').splice(posn,1);
-	    }
-	}
-    });
+ractive.on('new employee', function(employee) {
+  employee.id = String(this.get('employees').length);
+
+  eb.send(pa, {
+    action : 'index',
+    _index : 'megacorp',
+    _type : 'employee',
+    _id : employee.id,
+    _source : employee
+  }, function(reply) {
+    if (reply.status === 'ok') {
+      // whatever
+    } else {
+      console.error('Failed to save employee: ' + reply.message);
+      // remove it from displayed list, sorry you don't belong there
+      var posn = this.get('employees').indexOf(employee);
+      if (-1 !== posn) {
+        this.get('employees').splice(posn, 1);
+      }
+    }
+  });
 });

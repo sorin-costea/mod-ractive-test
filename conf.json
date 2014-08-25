@@ -1,11 +1,12 @@
 {
-	"mongo-persistor": 
+  "app-config":
 	{
-		"address": "vertx.mongopersistor",
-		"host": "localhost",
-		"port": 27017,
-		"pool_size": 10,
-		"db_name": "testdata"
+    "index": "megacorp"
+  },
+
+	"elasticsearch": 
+	{
+		"address": "vertx.elasticsearch"
 	},
 
 	"web-server": 
@@ -23,21 +24,30 @@
 				"address": "vertx.basicauthmanager.login"
 			},
 
-			{
-				"address": "vertx.mongopersistor",
-				"match": 
-				{
-					"action": "find",
-					"collection": "comments"
-				}
-			},
+      {
+        "address": "vertx.elasticsearch",
+        "match": 
+        {
+          "action": "search",
+          "_index": "megacorp"
+        }
+      },
+
+      {
+        "address": "vertx.elasticsearch",
+        "match": 
+        {
+          "action": "update",
+          "_index": "megacorp"
+        }
+      },
 
 			{
-				"address": "vertx.mongopersistor",
+				"address": "vertx.elasticsearch",
 				"match": 
 				{
-					"action": "save",
-					"collection": "comments"
+					"action": "index",
+					"_index": "megacorp"
 				}
 			}
 		]

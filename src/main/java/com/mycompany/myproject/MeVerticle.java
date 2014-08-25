@@ -13,64 +13,75 @@ import org.vertx.java.platform.Verticle;
  */
 public class MeVerticle extends Verticle {
 
-	private AsyncResultHandler<String> deployHandler = new AsyncResultHandler<String>() {
-		public void handle(AsyncResult<String> asyncResult) {
-			if (asyncResult.succeeded()) {
-				loadSampleData();
-			} else {
-				asyncResult.cause().printStackTrace();
-			}
-		}
-	};
+  private static String CFG_APPLICATION = "app-config";
+  private static String CFG_WEBSERVER = "web-server";
+  private static String CFG_SEARCHER = "elasticsearch";
 
-	public void start() {
-		final EventBus eb = vertx.eventBus();
-		Handler<Message<String>> myHandler = new Handler<Message<String>>() {
-			public void handle(Message<String> message) {
-				System.out.println("I received a message " + message.body());
-		    message.reply("Heres a reply: " + message.body());
-			}
-		};
-		eb.registerHandler("test.address", myHandler);
+  private AsyncResultHandler<String> deployHandler = new AsyncResultHandler<String>() {
+    public void handle(AsyncResult<String> asyncResult) {
+      if (asyncResult.succeeded()) {
+        loadSampleData();
+      } else {
+        asyncResult.cause().printStackTrace();
+      }
+    }
+  };
 
-		JsonObject config = container.config();
-		container.deployModule("io.vertx~mod-web-server~2.0.0-final", config.getObject("web-server"));
-		container.deployModule("io.vertx~mod-mongo-persistor~2.1.0", config.getObject("mongo-persistor"), deployHandler);
-		System.out.println("started");
-	};
+  public void start() {
+    JsonObject config = container.config();
+    container.deployModule("io.vertx~mod-web-server~2.0.0-final", config.getObject(CFG_WEBSERVER));
+    container.deployModule("com.englishtown~vertx-mod-elasticsearch~1.2.0", config.getObject(CFG_SEARCHER),
+        deployHandler);
+  };
 
-	private void loadSampleData() {
-		final EventBus eb = vertx.eventBus();
-		JsonObject cmd = new JsonObject();
-		cmd.putString("action", "count");
-		cmd.putString("collection", "comments");
-		cmd.putObject("matcher", new JsonObject());
+  private void loadSampleData() {
+    final EventBus eb = vertx.eventBus();
+    String index = container.config().getObject(CFG_APPLICATION).getString("index");
+    JsonObject cmd = new JsonObject();
+    cmd.putString("action", "search"); // index must exist, our module can't create
+    cmd.putString("_index", index);
+    cmd.putString("_type", "employee");
+    // not supported cmd.putBoolean("_source", false);
+    JsonObject query = new JsonObject();
+    query.putObject("match_all", new JsonObject());
+    query.putString("ignore_indices", "missing");
+    cmd.putObject("query", query);
 
-		eb.send("vertx.mongopersistor", cmd,
-		    new Handler<Message<JsonObject>>() {
-			    public void handle(Message<JsonObject> message) {
-				    if (0 != "ok".compareTo(message.body().getString("status"))
-				        || 0 == message.body().getInteger("count")) {
+    String searcher = container.config().getObject(CFG_SEARCHER).getString("address");
+    eb.send(searcher, cmd,
+        new Handler<Message<JsonObject>>() {
+          public void handle(Message<JsonObject> message) {
 
-				    	JsonObject cmd = new JsonObject();
-					    cmd.putString("action", "save");
-					    cmd.putString("collection", "comments");
+            if (0 != "ok".compareTo(message.body().getString("error", "ok"))
+                || 0 == message.body().getObject("hits").getInteger("total")) {
 
-					    Buffer jsonBuf = vertx.fileSystem().readFileSync("static_data.json");
-					    JsonObject staticData = new JsonObject(jsonBuf.toString());
-					    for (int i = 0; i < staticData.getArray("comments").size(); i++) {
-						    cmd.putValue("document", staticData.getArray("comments").get(i));
-						    eb.send("vertx.mongopersistor", cmd,
-						        new Handler<Message<JsonObject>>() {
-							        public void handle(Message<JsonObject> message) {
-								        System.out.println("saved test comment: " + message.body().getString("status", "wot?"));
-							        }
-						        });
-					    }
+              System.out.println("---because: " + message.body().getString("error", "no error"));
+              System.out.println("---because: " + message.body().getObject("hits").getInteger("total"));
+              String index = container.config().getObject(CFG_APPLICATION).getString("index");
+              JsonObject cmd = new JsonObject();
+              cmd.putString("action", "index");
+              cmd.putString("_index", index);
+              cmd.putString("_type", "employee");
 
-				    }
-			    }
-		    });
+              String searcher = container.config().getObject(CFG_SEARCHER).getString("address");
+              Buffer jsonBuf = vertx.fileSystem().readFileSync("static_data.json");
+              JsonObject staticData = new JsonObject(jsonBuf.toString());
+              
+              // could have used bulk but I hate that formatting
+              for (int i = 0; i < staticData.getArray("employee").size(); i++) {
+                cmd.putString("_id", String.valueOf(i));
+                cmd.putObject("_source", (JsonObject) staticData.getArray("employee").get(i));
+                eb.send(searcher, cmd,
+                    new Handler<Message<JsonObject>>() {
+                      public void handle(Message<JsonObject> message) {
+                        System.out.println("saved employee: " + message.body().getString("error", "ok"));
+                      }
+                    });
+              }
 
-	}
+            }
+          }
+        });
+
+  }
 }

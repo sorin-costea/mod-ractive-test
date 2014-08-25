@@ -1,28 +1,32 @@
 {
-	"comments": 
+	"employee": 
 	[
 		{
-			"id": 1,
-			"author": "Rich",
-			"text": "FIRST!!!"
+		  "id": "0",
+      "first_name": "Richie",
+      "last_name": "Rich",
+			"about": "FIRST!!!"
 		},
 
 		{
-			"id": 2,
-			"author": "anonymous",
-			"text": "I disagree with the previous commenter"
+		  "id": "1",
+			"first_name": "anon",
+      "last_name": "commenter",
+			"about": "I disagree with all other commenter"
 		},
 
 		{
-			"id": 3,
-			"author": "Samuel L. Ipsum",
-			"text": "If they don't know, that means we never told anyone. And if we never told anyone it means we never made it back. Hence we die down here. Just as a matter of deductive logic.\n\nYou think water moves fast? You should see ice. It moves like it has a mind. Like it knows it killed the world once and got a taste for murder."
+		  "id": "2",
+			"first_name": "Harry",
+      "last_name": "Adams",
+			"about": "If they don't know, that means we never told anyone. And if we never told anyone it means we never made it back. Hence we die down here. Just as a matter of deductive logic.\n\nYou think water moves fast? You should see ice. It moves like it has a mind. Like it knows it killed the world once and got a taste for murder."
 		},
 
 		{
-			"id": 4,
-			"author": "Jon Grubber",
-			"text": "**Hey you guys!** I can use [markdown](http://daringfireball.net/projects/markdown/) in my posts"
+		  "id": "3",
+      "first_name": "Jon",
+      "last_name": "Grubber",
+			"about": "**Hey you guys!** I can use [markdown](http://daringfireball.net/projects/markdown/) in my description"
 		}
 	]
 }

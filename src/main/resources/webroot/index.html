@@ -6,33 +6,37 @@
 </head>
 
 <body>
-	<div id='example' class='comment-box' />
+	<div id='example' class='employee-box' />
 	<div id='template'>
-		<h3>Comments</h3>
+		<h3>Employees</h3>
 
-		<!-- comment list -->
-		<div class='comment-list'>
-			{{#comments}}
-			<div class='comment-block' intro='slide'>
-				<h4 class='comment-author'>{{author}}</h4>
+		<!-- employee list -->
+		<div class='employee-list'>
+			{{#employees}}
+			<div class='employee-block' intro='slide'>
+				<h4 class='employee-last-name'>{{last_name}}, {{first_name}}</h4>
 
-				<div class='comment-text'>{{{ renderMarkdown( text ) }}}</div>
+        <div class='employee-about'>{{{ renderMarkdown( about ) }}}</div>
 			</div>
-			{{/comments}}
+			{{/employees}}
 		</div>
 
-		<!-- 'new comment' form -->
-		<form name='comment-form' class='comment-form' on-submit='post'>
+		<!-- 'add employee' form -->
+		<form name='employee-form' class='employee-form' on-submit='post'>
 
-			<!-- author name -->
-			<input class='author-input' value='{{author}}'
-				placeholder='Your name' required>
+			<!-- last name -->
+			<input class='last-input' value='{{last_name}}'
+				placeholder='Last name' required>
 
-			<!-- comment body -->
-			<textarea value='{{text}}' placeholder='Say something...' required></textarea>
+			<!-- first name -->
+      <input class='first-input' value='{{first_name}}'
+        placeholder='First name' required>
+      
+      <!-- about -->
+      <textarea value='{{about}}' placeholder='Describe...' required></textarea>
 
-			<!-- 'submit comment' button -->
-			<input type='submit' value='Submit comment'>
+			<!-- 'add employee' button -->
+			<input type='submit' value='Add employee'>
 		</form>
 	</div>
 </body>

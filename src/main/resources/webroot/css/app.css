@@ -134,7 +134,7 @@ pre .string {
 pre .keyword {
     color: #000064;
 }
-pre .comment {
+pre .employee {
     color: #AAAAAA;
 }
 pre.language-javascript .number {
@@ -265,12 +265,12 @@ h3, h4 {
 h4 {
     margin: 0;
 }
-.comment-block {
+.employee-block {
     margin: 0 0 1em;
     padding: 0 0 0 10em;
     position: relative;
 }
-.comment-author {
+.employee-first-name {
     background-color: #EEEEEE;
     left: 0;
     padding: 0.5em;
@@ -278,21 +278,42 @@ h4 {
     top: 0;
     width: 9em;
 }
-.comment-text {
+.employee-last-name {
+    background-color: #EEEEEE;
+    left: 0;
+    padding: 0.5em;
+    position: absolute;
+    top: 0;
+    width: 9em;
+}
+.employee-about {
     -moz-box-sizing: border-box;
     border-top: 1px solid #EEEEEE;
     padding: 0.5em 0.5em 0.5em 1em;
     position: relative;
     width: 100%;
 }
-.comment-text p:last-child {
+.employee-about p:last-child {
     margin: 0;
 }
 form {
     padding: 0 0 0 10.5em;
     position: relative;
 }
-.author-input {
+.first-name-input {
+    -moz-box-sizing: border-box;
+    border: 1px solid #EEEEEE;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1) inset;
+    font-family: inherit;
+    font-size: inherit;
+    left: 0;
+    margin: 0;
+    padding: 0.5em;
+    position: absolute;
+    top: 0;
+    width: 10em;
+}
+.last-name-input {
     -moz-box-sizing: border-box;
     border: 1px solid #EEEEEE;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1) inset;
